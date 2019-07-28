@@ -9,6 +9,7 @@ package router
 import (
 	"context"
 	"net/http"
+	"path/filepath"
 
 	"github.com/{{github}}/internal/api/access"
 	"github.com/{{github}}/internal/api/{{toLower child}}s"
@@ -84,6 +85,7 @@ func New(
 
 				r.Get("/", projects.HandleFind(projectStore))
 				r.Patch("/", projects.HandleUpdate(projectStore))
+				r.Delete("/", projects.HandleDelete(projectStore))
 
 				// {{toLower parent}} endpoints
 				r.Route("/{{toLower parent}}s", func(r chi.Router) {
@@ -176,8 +178,22 @@ func New(
 		},
 	)
 
+	// server all other routes from the filesystem.
+	fs := http.FileServer(dist.FileSystem())
 	r.With(sec.Handler).NotFound(
-		http.FileServer(dist.FileSystem()).ServeHTTP,
+		http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			// because this is a single page application,
+			// we need to always load the index.html file
+			// in the root of the project, unless the path
+			// points to a file with an extension (css, js, etc)
+			if filepath.Ext(r.URL.Path) == "" {
+				// HACK: alter the path to point to the
+				// root of the project.
+				r.URL.Path = "/"
+			}
+			// and finally server the file.
+			fs.ServeHTTP(w, r)
+		}),
 	)
 
 	return r

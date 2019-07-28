@@ -1,32 +1,70 @@
-import hydrate from 'preact-iso/hydrate';
-import { LocationProvider, Router } from 'preact-iso/router';
-import lazy, { ErrorBoundary } from 'preact-iso/lazy';
-import Home from './pages/home/index.js';
-import NotFound from './pages/_404.js';
-import Header from './header.js';
+import { useEffect, useState } from "react";
+import { render } from "react-dom";
+import { Route, Switch, useRoute } from "wouter";
+import { SWRConfig } from "swr";
+// import { fetcher } from "./api/config";
 
-const About = lazy(() => import('./pages/about/index.js'));
+import Link from "./shared/link.js";
+import { ProvideSession, useSession } from "./hooks/session.js";
 
-export function App() {
+import Account from "./pages/account.js";
+import Home from "./pages/home.js";
+import Login from "./pages/login.js";
+import Project from "./pages/project.js";
+import Register from "./pages/register.js";
+import Users from "./pages/users.js";
+
+export default function App() {
+	const { session, fetcher } = useSession();
+
+	// if the session is loaded, and the session
+	// is falsey, the login and register routes
+	// are exposed.
+	if (!session) {
+		return (
+			<>
+				<Switch>
+					<Route path="/register" component={Register} />
+					<Route component={Login} />
+				</Switch>
+			</>
+		);
+	}
+
 	return (
-		<LocationProvider>
-			<div class="app">
-				<Header />
-				<ErrorBoundary>
-					<Router>
-						<Home path="/" />
-						<About path="/about" />
-						<NotFound default />
-					</Router>
-				</ErrorBoundary>
-			</div>
-		</LocationProvider>
+		<>
+			<nav>
+				<ul>
+					<li>
+						<Link href="/">Home</Link>
+					</li>
+					{session.user.admin ? (
+						<li>
+							<Link href="/users">Users</Link>
+						</li>
+					) : undefined}
+					<li>
+						<Link href="/account">Account</Link>
+					</li>
+				</ul>
+			</nav>
+			<SWRConfig value={{`{{ fetcher }}`}}>
+				<Switch>
+					<Route path="/" component={Home} />
+					<Route path="/users" component={Users} />
+					<Route path="/projects/:project" component={Project} />
+					<Route path="/projects/:project/:path+" component={Project} />
+					<Route path="/account" component={Account} />
+					<Route>Not Found</Route>
+				</Switch>
+			</SWRConfig>
+		</>
 	);
 }
 
-hydrate(<App />);
-
-export async function prerender(data) {
-	const { default: prerender } = await import('preact-iso/prerender');
-	return await prerender(<App {...data} />);
-}
+render(
+	<ProvideSession>
+		<App />
+	</ProvideSession>,
+	document.body
+);

@@ -1,21 +1,22 @@
 {
+	"name": "my-app",
 	"scripts": {
 		"start": "wmr",
+		"serve": "wmr",
 		"build": "wmr build --out=dist/files",
-		"serve": "wmr serve"
-	},
-	"eslintConfig": {
-		"extends": "preact"
+		"format": "prettier --use-tabs --write public/**"
 	},
 	"alias": {
 		"react": "preact/compat",
 		"react-dom": "preact/compat"
 	},
 	"dependencies": {
-		"preact": "^10.5.12",
-		"preact-iso": "^1.0.0"
+		"preact": "^10.5.13",
+		"swr": "^0.5.4",
+		"wouter": "^2.7.4"
 	},
 	"devDependencies": {
-		"wmr": "^1.2.0"
+		"prettier": "2.2.1",
+		"wmr": "1.4.1"
 	}
 }
