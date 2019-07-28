@@ -26,9 +26,8 @@ npm run start
 
 # Testing
 
-The web application can be run in isolation, outside of the Go binary. Create a `.env.development.local` file with the remote server address (no trailing slash) and token.
+The web application can be run in isolation, outside of the Go binary. Create a `.env.development.local` file with the remote server address (no trailing slash).
 
 ```text
 SERVER=https://localhost:3000
-TOKEN=f0af17449a83681de22db7ce16672f16
 ```
