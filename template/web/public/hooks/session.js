@@ -46,6 +46,14 @@ function useProvideSession() {
 		);
 		const res = await fetch(endpoint, { ...initConfig, headers, credentials });
 
+		// if the response status is 401 it indicates the
+		// session token is expired. redirect the user to
+		// the login screen.
+		if (res.status === 401) {
+			signout();
+			return res;
+		}
+
 		// if the response succeeds but returns no content
 		// return the response. do not attempt to unmarshal
 		// the response body, since none exists.

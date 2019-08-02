@@ -24,6 +24,7 @@ import (
 	"github.com/{{github}}/internal/api/users"
 	"github.com/{{github}}/internal/logger"
 	"github.com/{{github}}/internal/store"
+	"github.com/{{github}}/internal/swagger"
 	"github.com/{{github}}/web/dist"
 
 	"github.com/go-chi/chi"
@@ -157,6 +158,11 @@ func New(
 		r.Post("/register", register.HandleRegister(userStore, systemStore))
 	})
 
+	// serve swagger for embedded filesystem.
+	swaggerFS := http.FileServer(swagger.FileSystem())
+	r.Handle("/swagger", http.RedirectHandler("/swagger/", http.StatusSeeOther))
+	r.Handle("/swagger/*", http.StripPrefix("/swagger/", swaggerFS))
+
 	// create middleware to enforce security best practices.
 	sec := secure.New(
 		secure.Options{
@@ -178,7 +184,7 @@ func New(
 		},
 	)
 
-	// server all other routes from the filesystem.
+	// serve all other routes from the embedded filesystem.
 	fs := http.FileServer(dist.FileSystem())
 	r.With(sec.Handler).NotFound(
 		http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
