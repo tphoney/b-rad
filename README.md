@@ -1,2 +1,2 @@
-b-rad is <b>b</b>rad/s <b>r</b>apid <b>a</b>pplication <b>d</b>evelopment template.
+<b>B</b>rad's <b>R</b>apid <b>A</b>pplication <b>D</b>evelopment template.
 
